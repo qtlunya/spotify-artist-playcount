@@ -36,7 +36,7 @@ def log(*func_args, **kwargs):
 def get_access_token():
     r = session.post('https://accounts.spotify.com/api/token',
                      data={'grant_type': 'client_credentials'},
-                     uth=(config['client_id'], config['client_secret']))
+                     auth=(config['client_id'], config['client_secret']))
     r.raise_for_status()
 
     data = r.json()
