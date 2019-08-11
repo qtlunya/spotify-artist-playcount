@@ -123,7 +123,12 @@ for arg in args.search:
 
     data = r.json()
 
-    if not data['artists']['items']:
+    if 'error' in data:
+        err = data['error']
+        log(colored(f'Error: ({err["status"]}) {err["message"]}'), 'red')
+        sys.exit(1)
+
+    if not data.get('artists', {}).get('items'):
         log(colored(f'Artist {arg!r} not found.', 'red'))
         sys.exit(1)
 
