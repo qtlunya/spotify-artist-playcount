@@ -18,6 +18,8 @@ parser.add_argument('-s', '--search', default=[], action='append', help='artist 
 parser.add_argument('-a', '--album', help='search for specific album(s) only')
 parser.add_argument('-t', '--track', help='search for specific track(s) only')
 parser.add_argument('-c', '--country', help='country code to retrieve results from')
+parser.add_argument('--types', type=lambda x: x.split(','), default=['album', 'single'])  # album, single, compilation
+parser.add_argument('--features', action='store_true', help='include albums where the artist is featured')
 parser.add_argument('--no-skip', action='store_true', help='do not skip duplicate songs')
 parser.add_argument('--slow', action='store_true', help='add delay between printing lines')
 args = parser.parse_args()
@@ -72,7 +74,7 @@ def get_albums(artist_id, country_code, offset=0, albums=[]):
     r = session.get(f'https://api.spotify.com/v1/artists/{artist_id}/albums',
                     params={
                         'country': country_code,
-                        'include_groups': 'album,single',
+                        'include_groups': 'album,single,appears_on' if args.features else 'album,single',
                         'limit': 50,
                         'offset': offset,
                     })
@@ -146,6 +148,9 @@ for artist in artists:
         if album['id'] in seen_albums:
             continue
 
+        if album['album_type'] not in args.types:
+            continue
+
         if args.album and args.album.lower() not in album['name'].lower():
             continue
 
@@ -153,7 +158,7 @@ for artist in artists:
 
         album_playcount = 0
 
-        log(f'Getting playcounts for {colored(album["name"], "cyan")}...', attrs=['bold'])
+        log(f'Getting playcounts for {colored(album["name"], "cyan")} ({album["album_type"]})...', attrs=['bold'])
 
         r = session.get(config['playcount_api_url'], params={'albumid': album['id']})
         r.raise_for_status()
@@ -161,6 +166,10 @@ for artist in artists:
 
         for disc in data['data']['discs']:
             for track in disc['tracks']:
+                if not (any(x for x in album['artists'] if x['uri'] == f'spotify:artist:{artist}') or
+                        any(x for x in track['artists'] if x['uri'] == f'spotify:artist:{artist}')):
+                    continue
+
                 if args.track and args.track.lower() not in track['name'].lower():
                     continue
 
