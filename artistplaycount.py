@@ -169,8 +169,6 @@ for artist in artists:
         r.raise_for_status()
         data = r.json()
 
-        print(album['album_group'], album['album_type'])
-
         for disc in data['data']['discs']:
             for track in disc['tracks']:
                 if not (any(x for x in album['artists'] if x['uri'] == f'spotify:artist:{artist}') or
