@@ -8,6 +8,8 @@ import time
 
 import colorama
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 from termcolor import colored
 
 colorama.init(autoreset=True)
@@ -25,6 +27,9 @@ parser.add_argument('--slow', action='store_true', help='add delay between print
 args = parser.parse_args()
 
 session = requests.Session()
+adapter = HTTPAdapter(max_retries=Retry(total=5, backoff_factor=1, status_forcelist=[500]))
+session.mount('http://', adapter)
+session.mount('https://', adapter)
 
 with open('config.json') as fd:
     config = json.load(fd)
@@ -163,6 +168,8 @@ for artist in artists:
         r = session.get(config['playcount_api_url'], params={'albumid': album['id']})
         r.raise_for_status()
         data = r.json()
+
+        print(album['album_group'], album['album_type'])
 
         for disc in data['data']['discs']:
             for track in disc['tracks']:
