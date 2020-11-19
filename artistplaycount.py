@@ -15,6 +15,8 @@ colorama.init(autoreset=True)
 parser = argparse.ArgumentParser()
 parser.add_argument('artist', nargs='*', help='Spotify ID of the artists(s)')
 parser.add_argument('-s', '--search', default=[], action='append', help='artist name(s) to search for')
+parser.add_argument('-a', '--album', help='search for specific album(s) only')
+parser.add_argument('-t', '--track', help='search for specific track(s) only')
 parser.add_argument('-c', '--country', help='country code to retrieve results from')
 parser.add_argument('--no-skip', action='store_true', help='do not skip duplicate songs')
 parser.add_argument('--slow', action='store_true', help='add delay between printing lines')
@@ -144,6 +146,9 @@ for artist in artists:
         if album['id'] in seen_albums:
             continue
 
+        if args.album and args.album.lower() not in album['name'].lower():
+            continue
+
         seen_albums.add(album['id'])
 
         album_playcount = 0
@@ -156,6 +161,9 @@ for artist in artists:
 
         for disc in data['data']['discs']:
             for track in disc['tracks']:
+                if args.track and args.track.lower() not in track['name'].lower():
+                    continue
+
                 if ((not args.no_skip) and
                         (track['uri'] in seen_tracks or track['playcount'] in playcounts)):
                     log(f'* Skipping {track["name"]!r}, already seen before', 'yellow')
