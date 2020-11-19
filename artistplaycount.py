@@ -154,21 +154,22 @@ for artist in artists:
         r.raise_for_status()
         data = r.json()
 
-        for track in data['data']:
-            if ((not args.no_skip) and
-                    (track['uri'] in seen_tracks or track['playcount'] in playcounts)):
-                log(f'* Skipping {track["name"]!r}, already seen before', 'yellow')
-                continue
+        for disc in data['data']['discs']:
+            for track in disc['tracks']:
+                if ((not args.no_skip) and
+                        (track['uri'] in seen_tracks or track['playcount'] in playcounts)):
+                    log(f'* Skipping {track["name"]!r}, already seen before', 'yellow')
+                    continue
 
-            seen_tracks.add(track['uri'])
-            playcounts.add(track['playcount'])
+                seen_tracks.add(track['uri'])
+                playcounts.add(track['playcount'])
 
-            fmt_playcount = '{:,d}'.format(track['playcount'])
-            color_playcount = colored(fmt_playcount, 'yellow', attrs=['bold'])
-            log(f'* {track["name"]}: {color_playcount}')
+                fmt_playcount = '{:,d}'.format(track['playcount'])
+                color_playcount = colored(fmt_playcount, 'yellow', attrs=['bold'])
+                log(f'* {track["name"]}: {color_playcount}')
 
-            artist_playcount += track['playcount']
-            album_playcount += track['playcount']
+                artist_playcount += track['playcount']
+                album_playcount += track['playcount']
 
         if album_playcount:
             fmt_playcount = '{:,d}'.format(album_playcount)

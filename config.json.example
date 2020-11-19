@@ -1,5 +1,5 @@
 {
   "client_id": "YOUR_CLIENT_ID",
   "client_secret": "YOUR_CLIENT_SECRET",
-  "playcount_api_url": "https://t4ils.dev:4433/api/beta/albumPlayCount"
+  "playcount_api_url": "https://api.t4ils.dev/albumPlayCount"
 }
